@@ -1,0 +1,18 @@
+{
+  "name": "mysql-autopatcher",
+  "version": "0.0.1",
+  "private": true,
+  "main": "autopatcher",
+  "scripts": {
+    "start": "node autopatcher.js"
+  },
+  "dependencies": {
+    "async": "~0.2.10",
+    "moment": "~2.5.1",
+    "mysql": "~2.1.1"
+  },
+  "devDependencies": {
+    "nodeunit-async": "0.0.3",
+    "fs-extra": "~0.8.1"
+  }
+}

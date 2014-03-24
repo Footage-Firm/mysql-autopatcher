@@ -1,15 +1,6 @@
-lib-cov
-*.seed
-*.log
-*.csv
-*.dat
-*.out
-*.pid
-*.gz
-
-pids
-logs
-results
-
+# node stuff
 npm-debug.log
 node_modules
+
+# unit test working files
+test/patchdirs/major/patch_0003__bobby-tables.sql

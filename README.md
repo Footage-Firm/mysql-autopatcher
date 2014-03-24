@@ -1,7 +1,9 @@
 mysql-autopatcher
 =================
 
-Simple autopatcher for MySQL patches with support for major and minor versions as well as multiple directories.
+Simple autopatcher for MySQL patches with support for major and minor versions as well as multiple directories. Uses patch naming convetion and dynamically created MySQL database table to track which patches have already been applied and which patches should be applied. It will then attempt to apply the new patches.
+
+This auto patcher is written in [node.js](http://nodejs.org/) and requires node to run. Following node convention, node modules are not checked in. These can be downloaded and installed using the command ```npm install``` within the root directory.
 
 ## Patch Naming Convetion
 

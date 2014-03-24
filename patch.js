@@ -1,4 +1,4 @@
-#! node
+'use strict';
 
 var fs = require('fs');
 var path = require('path');
@@ -14,7 +14,7 @@ function exec() {
     var configFile = process.argv[3] || path.resolve(__dirname,'config.json');
 
     if (!fs.existsSync(configFile)) {
-        console.err('Missing config.json file');
+        console.error('Missing config.json file');
         process.exit(1);
     }
 

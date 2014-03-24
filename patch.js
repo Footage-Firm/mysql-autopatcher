@@ -14,7 +14,7 @@ function exec() {
     var configFile = process.argv[3];
 
     // If no config file but profile ends with .json or .config, user is only specifying a config file but no profile
-    if (profile.match(/\.(json|config)$/i)) {
+    if (profile && profile.match(/\.(json|config)$/i)) {
         configFile = profile;
         profile = null;
     }

@@ -35,7 +35,7 @@ function exec() {
     // Load the config for the given profile
 
     if (!universalConfig.profiles[profile]) {
-        console.err('Invalid profile '+profile+'. Specify one of the following available profiles: '+Object.keys(universalConfig.profiles || {}).join(', '));
+        console.error('Invalid profile '+profile+'. Specify one of the following available profiles: '+Object.keys(universalConfig.profiles || {}).join(', '));
         process.exit(2);
     }
 

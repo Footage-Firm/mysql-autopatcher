@@ -1,7 +1,7 @@
 /* Create a table */
 CREATE TABLE people (
 	id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
-	name varchar(31) NOT NULL
+	name varchar(63) NOT NULL
 );
 
 /* Now lets make another table; and have hopefuly this in-comment semicolon doesn't mess up the autopatcher! */

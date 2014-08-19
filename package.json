@@ -9,7 +9,7 @@
   "dependencies": {
     "async": "~0.2.10",
     "moment": "~2.5.1",
-    "mysql": "~2.1.1"
+    "mysql": "^2.4.2"
   },
   "devDependencies": {
     "nodeunit-async": "0.0.3",

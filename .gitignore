@@ -5,5 +5,8 @@ node_modules
 # unit test working files
 test/patchdirs/major/patch_0003__bobby-tables.sql
 
+#the generated patch
+allPatches.sql
+
 # IDE stuff
 .idea

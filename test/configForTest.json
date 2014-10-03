@@ -11,6 +11,13 @@
             "database": "autopatcher_test",
             "patchDirs": ["patchDirs/major",
                           "patchDirs/minor"]
+        },
+        "level3-profile": {
+            "database": "autopatcher_test",
+            "patchDirs": ["patchDirs/major",
+                          "patchDirs/minor",
+                          "patchDirs/level3"],
+            "numberOfPatchLevels": 3
         }
     }
 }

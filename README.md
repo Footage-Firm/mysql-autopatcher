@@ -9,8 +9,9 @@ This auto patcher is written in [node.js](http://nodejs.org/) and requires node 
 
 The autopatcher expects patches to have the following naming convention: patch-*&lt;major&gt;*-*&lt;minor&gt;*-*&lt;description&gt;*
 Note that instead of hyphons any non-digit character will suffice. Minor versions, description, and seperation between "patch" and the major version are all optional. If no minor version is present, a minor version of 0 will be assumed.
+Also, it's possible to extend the number of patch "levels" beyond the default 2 (major/minor) to any arbitrary number.  We're using 3 for local dev to enable seed data at the third level.  These "levels" will be refered to as level3, level4, etc.
 
-Patches are executed in order of major versions with ties broken by minor versions.
+Patches are executed in order of major versions with ties broken by minor versions.  Note, when using patch level > 2, ties are broken by subsequent levels (e.g., for 3 levels, level3 is used to break tie when both major and minor are equal).
 
 Example patch file name: ```patch_0004_9__this-does-cool-things.sql```
 
@@ -27,6 +28,7 @@ Configuratino uses a JSON file that has an object which contains one or more pro
 * **port** - port for the MySQL Database *(default: 3306)*
 * **user** - MySQL user to use *(default: none)*
 * **password** - MySQL password to use *(default: none)*
+* **numberOfPatchLevels** - Number of "levels" to track patches.  Default of 2 corresponds to major/minor.  3 corresponds to major/minor/level3.  And so on. (default: 2)
 
 ### Example config.json
 
@@ -43,6 +45,12 @@ Configuratino uses a JSON file that has an object which contains one or more pro
             "database": "autopatcher_test",
             "patchDirs": ["patchDirs/major",
                           "patchDirs/minor"]
+        },
+        "dev": {
+            "numberOfPatchLevels": 3,
+            "patchDirs": ["patchDirs/major",
+                          "patchDirs/minor",
+                          "patchDirs/level3"]
         }
     }
 }

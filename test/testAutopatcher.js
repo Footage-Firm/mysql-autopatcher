@@ -39,7 +39,7 @@ module.exports.testAutopatcher = function(test) {
     }
 
 
-    test.expect(10);
+    test.expect(11);
 
     th.runTest(test, {
         dropTables: [function(next) {
@@ -87,9 +87,12 @@ module.exports.testAutopatcher = function(test) {
         getWeaklingId: ['getBeforeWeaklingId', function(next) {
             db.queryOne('SELECT id FROM people WHERE name="Weakling"', next);
         }],
-        assertResults: ['getWeaklingId', function(next, results) {
+        runAutopatcherLevel2ShouldBreak:  ['getWeaklingId', function(next) {
+            _runAutopatcher(CONFIG_PATH, 'test-profile', next);
+        }],
+        assertResults: ['runAutopatcherLevel2ShouldBreak', function(next, results) {
 
-            // Level 2 tests
+            // Level 2 tests (5 assertions)
             test.equal(0, results.runAutopatcher.code);
             test.equal(0, results.runNewPatch.code);
             test.equal(1, results.runAutopatcherLevel3ShouldBreak.code);
@@ -97,13 +100,17 @@ module.exports.testAutopatcher = function(test) {
             test.equal(40000, results.checkUpdatedDb.the_sum);
 
 
-            // Level 3 tests
+            // Level 3 tests (5 assertions)
             test.equal('numberOfPatchLevels does not match number of columns in database_patches. '
                         + 'To use current numberOfPatchLevels, please re-create your DB from scratch', results.runAutopatcherLevel3ShouldBreak.stderr);
             test.equal(0, results.runAutopatcherLevel3.code);
             test.equal(3, results.checkColorTable.numRowsInColorTable);
             test.equal(42000, results.checkPeoplePower.the_sum);
             test.ok(results.getBeforeWeaklingId.id < results.getWeaklingId.id);
+
+            // Level 2 tests - second go around (1 assertion)
+            test.equal('numberOfPatchLevels does not match number of columns in database_patches. '
+                + 'To use current numberOfPatchLevels, please re-create your DB from scratch', results.runAutopatcherLevel2ShouldBreak.stderr);
 
             next();
         }]

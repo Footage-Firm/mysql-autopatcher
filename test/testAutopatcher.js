@@ -39,7 +39,7 @@ module.exports.testAutopatcher = function(test) {
     }
 
 
-    test.expect(4);
+    test.expect(9);
 
     th.runTest(test, {
         dropTables: [function(next) {
@@ -50,25 +50,63 @@ module.exports.testAutopatcher = function(test) {
             });
         }],
         runAutopatcher: ['dropTables', function(next) {
-            _runAutopatcher(next);
+            _runAutopatcher(CONFIG_PATH, 'test-profile', next);
         }],
         checkDb: ['runAutopatcher', function(next) {
             db.queryOne('SELECT SUM(power_level) AS the_sum FROM people', next);
         }],
         runNewPatch: ['checkDb', function(next) {
             fs.copySync(path.join(path.dirname(newPatchPath),'future-'+newPatchFile), newPatchPath);
-            _runAutopatcher(next);
+            _runAutopatcher(CONFIG_PATH, 'test-profile', next);
         }],
         checkUpdatedDb: ['runNewPatch', function(next) {
             db.queryOne('SELECT SUM(power_level) AS the_sum FROM people', next);
         }],
-        assertResults: ['checkUpdatedDb', function(next, results) {
+        runAutopatcherLevel3ShouldBreak: ['checkUpdatedDb', function(next) {
+            _runAutopatcher(CONFIG_PATH, 'level3-profile', next);
+        }],
+        dropTables2: ['runAutopatcherLevel3ShouldBreak', function(next) {
+            async.eachSeries(['database_patches', 'colors', 'people'], function(table, eachNext) {
+                db.query('DROP TABLE IF EXISTS '+table, eachNext);
+            }, function(err) {
+                next(err);
+            });
+        }],
+        runAutopatcherLevel3: ['dropTables2', function(next) {
+            _runAutopatcher(CONFIG_PATH, 'level3-profile', next);
+        }],
+        checkColorTable: ['runAutopatcherLevel3', function(next) {
+           db.queryOne('SELECT COUNT(*) as numRowsInColorTable FROM colors', next);
+        }],
+        checkPeoplePower: ['checkColorTable', function(next) {
+            db.queryOne('SELECT SUM(power_level) AS the_sum FROM people', next);
+        }],
+        getBeforeWeaklingId: ['checkPeoplePower', function(next) {
+            db.queryOne('SELECT id FROM people WHERE name="Before Weakling"');
+        }],
+        getWeaklingId: ['getBeforeWeaklingId', function(next) {
+            db.queryOne('SELECT id FROM people WHERE name="Weakling"');
+        }],
+        assertResults: ['getWeaklingId', function(next, results) {
 
-            test.equal(0, results.runAutopatcher);
-            test.equal(0, results.runNewPatch);
-
+            // Level 2 tests
+            test.equal(0, results.runAutopatcher.code);
+            test.equal(0, results.runNewPatch.code);
+            test.equal(1, results.runAutopatcherLevel3ShouldBreak.code);
             test.equal(31000, results.checkDb.the_sum);
             test.equal(40000, results.checkUpdatedDb.the_sum);
+
+
+            // Level 3 tests
+            test.equal('numberOfPatchLevels does not match number of columns in database_patches. '
+                        + 'To use current numberOfPatchLevels, please re-create your DB from scratch', results.runAutopatcherLevel3ShouldBreak.stderr);
+            test.equal(0, results.runAutopatcherLevel3.code);
+            test.equal(3, results.checkColorTable.numRowsInColorTable);
+            test.equal(42000, results.checkPeoplePower.the_sum);
+            test.
+
+            //Before Weakling
+            //Weakling
 
             next();
         }]
@@ -77,17 +115,24 @@ module.exports.testAutopatcher = function(test) {
 
 /**
  * Helper function that runs the autopatcher logging any of its output to the console
- * @param callback {function} callback(err, exiteCode)
+ *
+ * @param configFileFullPath - path to the AP configuration file that we'll pass to node patch.js {profile} {configFileFullPath}
+ * @param profile - profile we want to select within AP config file that we'll pass to node patch.js {profile} {configFileFullPath}
+ * @param callback {function} callback(err, exitCode)
  * @private
  */
-function _runAutopatcher(callback) {
+function _runAutopatcher(configFileFullPath, profile, callback) {
 
-    var autopatcher = spawn('node', ['patch.js', 'test-profile', CONFIG_PATH], {cwd: path.resolve(__dirname,'..')});
+    var autopatcher = spawn('node', ['patch.js', profile, configFileFullPath], {cwd: path.resolve(__dirname,'..')});
+
+    var stdout = '';
+    var stderr = '';
 
     autopatcher.stdout.on('data', function (data) {
         var str = (''+data).trim();
         if (str) {
             console.log(str);
+            stdout += str;
         }
     });
 
@@ -95,10 +140,11 @@ function _runAutopatcher(callback) {
         var str = (''+data).trim();
         if (str) {
             console.error(str);
+            stderr += str;
         }
     });
 
     autopatcher.on('close', function (code) {
-        callback(null, code);
+        callback(null, {code:code, stdout: stdout, stderr: stderr});
     });
 }

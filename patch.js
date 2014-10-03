@@ -4,7 +4,7 @@ var fs = require('fs');
 var path = require('path');
 
 var patchCommandLineArguments = require('./lib/patchCommandLineArguments');
-var Autopatcher = require('./lib/autopatcher');
+var Autopatcher = require('./lib/autoPatcher');
 var AutopatcherConfiguration = require('./lib/autopatcherConfiguration');
 
 /**

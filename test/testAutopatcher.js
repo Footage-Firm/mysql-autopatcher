@@ -39,7 +39,7 @@ module.exports.testAutopatcher = function(test) {
     }
 
 
-    test.expect(9);
+    test.expect(10);
 
     th.runTest(test, {
         dropTables: [function(next) {
@@ -82,10 +82,10 @@ module.exports.testAutopatcher = function(test) {
             db.queryOne('SELECT SUM(power_level) AS the_sum FROM people', next);
         }],
         getBeforeWeaklingId: ['checkPeoplePower', function(next) {
-            db.queryOne('SELECT id FROM people WHERE name="Before Weakling"');
+            db.queryOne('SELECT id FROM people WHERE name="Before Weakling"', next);
         }],
         getWeaklingId: ['getBeforeWeaklingId', function(next) {
-            db.queryOne('SELECT id FROM people WHERE name="Weakling"');
+            db.queryOne('SELECT id FROM people WHERE name="Weakling"', next);
         }],
         assertResults: ['getWeaklingId', function(next, results) {
 
@@ -103,10 +103,7 @@ module.exports.testAutopatcher = function(test) {
             test.equal(0, results.runAutopatcherLevel3.code);
             test.equal(3, results.checkColorTable.numRowsInColorTable);
             test.equal(42000, results.checkPeoplePower.the_sum);
-            test.
-
-            //Before Weakling
-            //Weakling
+            test.ok(results.getBeforeWeaklingId.id < results.getWeaklingId.id);
 
             next();
         }]

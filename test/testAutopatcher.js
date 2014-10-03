@@ -101,16 +101,16 @@ module.exports.testAutopatcher = function(test) {
 
 
             // Level 3 tests (5 assertions)
-            test.equal('numberOfPatchLevels does not match number of columns in database_patches. '
-                        + 'To use current numberOfPatchLevels, please re-create your DB from scratch', results.runAutopatcherLevel3ShouldBreak.stderr);
+            test.equal('numberOfPatchLevels (3) does not match number of tracking columns in database_patches (2).\n'
+                        + 'To use specified profile, please re-create your DB from scratch.', results.runAutopatcherLevel3ShouldBreak.stderr);
             test.equal(0, results.runAutopatcherLevel3.code);
             test.equal(3, results.checkColorTable.numRowsInColorTable);
             test.equal(42000, results.checkPeoplePower.the_sum);
             test.ok(results.getBeforeWeaklingId.id < results.getWeaklingId.id);
 
             // Level 2 tests - second go around (1 assertion)
-            test.equal('numberOfPatchLevels does not match number of columns in database_patches. '
-                + 'To use current numberOfPatchLevels, please re-create your DB from scratch', results.runAutopatcherLevel2ShouldBreak.stderr);
+            test.equal('numberOfPatchLevels (2) does not match number of tracking columns in database_patches (3).\n'
+                + 'To use specified profile, please re-create your DB from scratch.', results.runAutopatcherLevel2ShouldBreak.stderr);
 
             next();
         }]

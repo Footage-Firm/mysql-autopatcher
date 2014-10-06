@@ -38,8 +38,14 @@ module.exports.testAutopatcher = function(test) {
         fs.unlinkSync(newPatchPath);
     }
 
+    var newPatchFile2 = 'patch_0003_0_1.sql';
+    var newPatchPath2 = path.resolve(__dirname,'patchdirs','level3',newPatchFile2);
+    if (fs.existsSync(newPatchPath2)) {
+        fs.unlinkSync(newPatchPath2);
+    }
 
-    test.expect(11);
+
+    test.expect(12);
 
     th.runTest(test, {
         dropTables: [function(next) {
@@ -90,9 +96,16 @@ module.exports.testAutopatcher = function(test) {
         runAutopatcherLevel2ShouldBreak:  ['getWeaklingId', function(next) {
             _runAutopatcher(CONFIG_PATH, 'test-profile', next);
         }],
-        assertResults: ['runAutopatcherLevel2ShouldBreak', function(next, results) {
+        runNewPatch2: ['runAutopatcherLevel2ShouldBreak', function(next) {
+            fs.copySync(path.join(path.dirname(newPatchPath2),'future-'+newPatchFile2), newPatchPath2);
+            _runAutopatcher(CONFIG_PATH, 'level3-profile', next);
+        }],
+        checkNewColor: ['runNewPatch2', function(next) {
+            db.queryOne('SELECT COUNT(*) as numCyanColors FROM colors c JOIN people p ON c.person_id = p.id WHERE p.name="John Smith" AND c.color="cyan"', next);
+        }],
+        assertResults: ['checkNewColor', function(next, results) {
 
-            // Level 2 tests (5 assertions)
+            // Level 2 tests ( 5 assertions )
             test.equal(0, results.runAutopatcher.code);
             test.equal(0, results.runNewPatch.code);
             test.equal(1, results.runAutopatcherLevel3ShouldBreak.code);
@@ -100,7 +113,7 @@ module.exports.testAutopatcher = function(test) {
             test.equal(40000, results.checkUpdatedDb.the_sum);
 
 
-            // Level 3 tests (5 assertions)
+            // Level 3 tests ( 5 assertions )
             test.equal('numberOfPatchLevels (3) does not match number of tracking columns in database_patches (2).\n'
                         + 'To use specified profile, please re-create your DB from scratch.', results.runAutopatcherLevel3ShouldBreak.stderr);
             test.equal(0, results.runAutopatcherLevel3.code);
@@ -108,9 +121,12 @@ module.exports.testAutopatcher = function(test) {
             test.equal(42000, results.checkPeoplePower.the_sum);
             test.ok(results.getBeforeWeaklingId.id < results.getWeaklingId.id);
 
-            // Level 2 tests - second go around (1 assertion)
+            // Level 2 tests - second go around ( 1 assertion )
             test.equal('numberOfPatchLevels (2) does not match number of tracking columns in database_patches (3).\n'
                 + 'To use specified profile, please re-create your DB from scratch.', results.runAutopatcherLevel2ShouldBreak.stderr);
+
+            // Level 3 test - should've run another patch which added cyan color ( 1 assertion )
+            test.equal(1, results.checkNewColor.numCyanColors);
 
             next();
         }]
